@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindtrip Replica</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to the CSS file -->
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        
+        <div class="flex-container">
+            <div class="menu-item">
+                <span>Chats </span>
+            </div>
+            <div class="menu-item">
+                <span>Explore</span>
+            </div>
+            <div class="menu-item">
+                <span>Notifications</span>
+            </div>
+             <div class="menu-item">
+                <span>Saved</span>
+            </div>
+            <div class="menu-item">
+                <span>Inspiration</span>
+            </div>
+            <div class="menu-item">
+                <span>Create</span>
+            </div>
+        </div>
+        <div class="new-chat">New chat</div>
+        <div class="traveler">
+            <span>Traveler</span>
+        </div>
+        <div class="footer">
+            Company Contact Help<br>
+            Terms Privacy<br>
+            © 2025 Flight.ly, Inc.
+        </div>
+    </div>
+
+    <!-- Map Container -->
+    <div class="map-container">
+        <h2>flight.ly</h2>
+        <form id="flight-search-form">
+            <input list="departure-city-options" id="departure-city" name="departure-city" placeholder="Departure City" required>
+            <datalist id="departure-city-options">
+                <% cities.forEach(city => { %>
+                    <option value="<%= city %>">
+                <% }); %>
+            </datalist>
+    
+            <input list="arrival-city-options" id="arrival-city" name="arrival-city" placeholder="Arrival City" required>
+            <datalist id="arrival-city-options">
+                <% cities.forEach(city => { %>
+                    <option value="<%= city %>">
+                <% }); %>
+            </datalist>
+    
+            <input type="date" id="departure-date" name="departure-date" required>
+    
+            <button type="submit" id="search-flights-button" class="btn-31">
+                <span class="text-container">
+                    <span class="text">Search Flights</span>
+                </span>
+            </button>
+        </form>
+        <div id="flight-results" class="flight-card-container">
+            <!-- Flight results will be populated dynamically -->
+        </div>
+
+        <div id="map">
+            Map Placeholder
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>New chat</h1>
+        <h2>Where to today?</h2>
+        <p>Hey there, where would you like to go? I'm here to assist you with booking your flight.</p>
+
+        <!-- AI Tool Input -->
+        <div class="ai-tool">
+            <input type="text" placeholder="Ask anything...">
+            <hr>
+        </div>
+    </div>
+
+    <script>
+        function formatDateTime(departureDatetime, arrivalDatetime) {
+            const departure = new Date(departureDatetime);
+            const arrival = new Date(arrivalDatetime);
+
+            // Extract times in local format
+            const departureTime = departure.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hourCycle: 'h12' });
+            const arrivalTime = arrival.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hourCycle: 'h12' });
+
+            // Extract local year, month, and day for accurate comparison
+            const departureYear = departure.getFullYear();
+            const departureMonth = departure.getMonth();
+            const departureDay = departure.getDate();
+
+            const arrivalYear = arrival.getFullYear();
+            const arrivalMonth = arrival.getMonth();
+            const arrivalDay = arrival.getDate();
+
+            // Create full local date objects (ignoring time) to accurately compare dates
+            const departureDate = new Date(departureYear, departureMonth, departureDay);
+            const arrivalDate = new Date(arrivalYear, arrivalMonth, arrivalDay);
+
+            // Calculate actual day difference
+            let dayDifference = (arrivalDate - departureDate) / (1000 * 60 * 60 * 24); // Convert milliseconds to days
+
+            // Ensure that if the flight lands on an earlier time but a different day, we still count +1
+            if (dayDifference === 0 && arrival < departure) {
+                dayDifference = 1;
+            }
+
+            // Add +1, +2, etc. if flight actually spans multiple days
+            const dayIndicator = dayDifference > 0 ? `<sup>+${dayDifference}</sup>` : '';
+
+            return `${departureTime} - ${arrivalTime} ${dayIndicator}`;
+        }
+
+
+        function formatDuration(duration) {
+            const [hours, minutes] = duration.split(':').map(Number);
+            return `${hours} hr ${minutes} min`;
+        }
+
+        function toggleLayoverDetails(event) {
+            // Find the closest .flight-info container
+            const flightInfo = event.target.closest('.flight-info');
+            
+            // Find the corresponding .layover-details div within the same .flight-info container
+            const details = flightInfo.querySelector('.layover-details');
+            
+            // Toggle the visibility of the details
+            details.style.display = details.style.display === "none" ? "block" : "none";
+        }
+
+
+        function displayFlightResults(flights) {
+            const flightResultsContainer = document.getElementById('flight-results');
+            flightResultsContainer.innerHTML = '';
+
+            if (flights.length === 0) {
+                flightResultsContainer.innerHTML = '<p>No flights found for the selected criteria.</p>';
+                return;
+            }
+
+            flights.forEach(flight => {
+                const card = document.createElement('div');
+                card.className = 'flight-card';
+
+                card.innerHTML = `
+                    <div class="flight-info">
+                        <div class="flight-header">
+                            <span>${formatDateTime(flight.departureDatetime, flight.arrivalDatetime)}</span>
+                            <span>${formatDuration(flight.totalFlightDuration)}</span>
+                            <span class="cost">$${flight.cost}</span>
+                            <button class="layover-toggle" ${flight.layoverCount === 0 ? 'disabled' : ''}>
+                                &#9660;
+                            </button>
+                        </div>
+                        <div class="flight-airline">
+                            <span class="airline">${flight.airline}</span>
+                        </div>
+                        <div class="layover-details" style="display: none;">
+                            ${flight.layovers.map((layover, index) => `
+                                <div class="layover">
+                                    <strong>Layover ${index + 1}:</strong> ${layover.city}
+                                    <br>Duration: ${formatDuration(layover.duration)}
+                                    <br>Next Flight Departs: ${new Date(layover.departureDatetime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hourCycle: 'h12' })}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                // Add the event listener to the button if there are layovers
+                if (flight.layoverCount > 0) {
+                    card.querySelector('.layover-toggle').addEventListener('click', function(event) {
+                        // Find the closest parent flight-info container
+                        const flightInfo = event.target.closest('.flight-info');
+                        const details = flightInfo.querySelector('.layover-details');
+
+                        // Toggle the visibility of the details
+                        details.style.display = details.style.display === "none" ? "block" : "none";
+                    });
+                }
+
+                // Append the card to the container
+                flightResultsContainer.appendChild(card);
+            });
+        }
+
+        document.getElementById('flight-search-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const departureDate = document.getElementById('departure-date').value;
+            const departureCity = document.getElementById('departure-city').value;
+            const arrivalCity = document.getElementById('arrival-city').value;
+
+            if (departureDate && departureCity && arrivalCity) {
+                try {
+                    const response = await fetch('/api/flights', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ departureDate, departureCity, arrivalCity }),
+                    });
+
+                    if (!response.ok) throw new Error('Failed to fetch flights');
+
+                    const flights = await response.json();
+                    displayFlightResults(flights);
+                } catch (error) {
+                    console.error('Error fetching flights:', error);
+                }
+            } else {
+                alert('Please fill in all the required fields.');
+            }
+        });
+    </script>
+</body>
+</html>
