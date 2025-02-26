@@ -18,11 +18,11 @@ app.use(express.json());
 
 // MySQL connection setup using environment variables
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password123',
-    database: 'FlightResearch',
-    port: 3306
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306
 });
 
 // Connect to MySQL
