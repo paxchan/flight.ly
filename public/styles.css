@@ -1,251 +1,252 @@
 /* General Styles */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-    margin: 0;
-    display: flex;
-    height: 100vh;
-    color: #333; /* Darker text for better readability */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  margin: 0;
+  display: flex;
+  height: 100vh;
+  color: #333; /* Darker text for better readability */
 }
 
 /* Sidebar Styles */
 .sidebar {
-    width: 160px;  /* Adjusted width */
-    background-color: #fff; /* White background */
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05); /* Subtle shadow */
-    display: flex;
-    flex-direction: column;
+  width: 8vw; /* Adjusted width */
+  background-color: #fff; /* White background */
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar h2 {
-    margin-bottom: 20px;
-    font-size: 1.2em;
-    font-weight: 600;
+  margin-bottom: 20px;
+  font-size: 1.2em;
+  font-weight: 600;
 }
 
 .flex-container {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .menu-item {
-    display: flex;
-    align-items: center;
-    padding: 10px 15px;
-    cursor: pointer;
-    border-radius: 8px; /* Rounded corners */
-    transition: background-color 0.2s ease;
-    margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 8px; /* Rounded corners */
+  transition: background-color 0.2s ease;
+  margin-bottom: 5px;
 }
 
 .menu-item:hover {
-    background-color: #f0f0f0; /* Light gray on hover */
+  background-color: #f0f0f0; /* Light gray on hover */
 }
 
 .menu-item span {
-    margin-left: 10px;
-    font-size: 0.9em;
+  margin-left: 10px;
+  font-size: 0.9em;
 }
 
 /* New Chat Button */
 .new-chat {
-    background-color: #f0f0f0;
-    padding: 12px 15px;
-    border-radius: 25px; /* More rounded */
-    width: fit-content; /* Adjust width to content */
-    text-align: center;
-    cursor: pointer;
-    margin-top: 15px;
-    font-weight: 500;
-    transition: background-color 0.2s ease;
+  background-color: #f0f0f0;
+  padding: 12px 15px;
+  border-radius: 25px; /* More rounded */
+  width: fit-content; /* Adjust width to content */
+  text-align: center;
+  cursor: pointer;
+  margin-top: 15px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
 }
 
 .new-chat:hover {
-    background-color: #e0e0e0;
+  background-color: #e0e0e0;
 }
 
 /* Traveler Section */
 .traveler {
-    display: flex;
-    align-items: center;
-    margin-top: auto; /* Push to bottom */
-    padding: 10px 15px;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  margin-top: auto; /* Push to bottom */
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
 }
 
 .traveler:hover {
-    background-color: #f0f0f0;
+  background-color: #f0f0f0;
 }
 
 .traveler span {
-    margin-left: 10px;
-    font-size: 0.9em;
-    font-weight: 500;
+  margin-left: 10px;
+  font-size: 0.9em;
+  font-weight: 500;
 }
 
 /* Footer Styles */
 .footer {
-    margin-top: 10px;
-    font-size: 0.7em;
-    color: #777;
+  margin-top: 10px;
+  font-size: 0.7em;
+  color: #777;
 }
 
 /* Main Content Styles */
 .main-content {
-    flex: 1;
-    padding: 30px; /* Increased padding */
-    max-width: 5; /* Limit width for readability */
+  flex: 1;
+  padding: 30px; /* Increased padding */
+  max-width: 5; /* Limit width for readability */
 }
 
 .main-content h1 {
-    font-size: 2em;
-    margin-bottom: 10px;
-    font-weight: 600;
+  font-size: 2em;
+  margin-bottom: 10px;
+  font-weight: 600;
 }
 
 .main-content h2 {
-    font-size: 1.5em;
-    margin-bottom: 20px;
-    font-weight: 500;
-    color: #555;
+  font-size: 1.5em;
+  margin-bottom: 20px;
+  font-weight: 500;
+  color: #555;
 }
 
 .main-content p {
-    font-size: 1em;
-    line-height: 1.6;
-    color: #666;
+  font-size: 1em;
+  line-height: 1.6;
+  color: #666;
 }
 
 /* AI Tool Input Styles */
 .ai-tool {
-    margin-top: 30px;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #f9f9f9;
+  margin-top: 30px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
 }
 
 .ai-tool input[type="text"] {
-    width: 95%;
-    padding: 10px;
-    border: none;
-    background-color: transparent;
-    outline: none;
-    font-size: 1em;
-    color: #444;
+  width: 95%;
+  padding: 10px;
+  border: none;
+  background-color: transparent;
+  outline: none;
+  font-size: 1em;
+  color: #444;
 }
-.ai-tool span{
-    position: relative;
-    bottom: 10px;
+.ai-tool span {
+  position: relative;
+  bottom: 10px;
 }
 .ai-tool hr {
-    border: none;
-    border-top: 1px solid #eee;
-    margin: 15px 0;
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 15px 0;
 }
 
 /* Map Container Styles */
 .map-container {
-    width: 600px; /* Adjusted width */
-    background-color: #fff;
-    padding: 20px;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.05);
+  width: 44vw; /* Adjusted width */
+  background-color: #fff;
+  padding: 20px;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.05);
 }
 
-.map-container input[type="text"], input[type="date"] {
-    width: 50%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box; /* Important to include padding in width */
+.map-container input[type="text"],
+input[type="date"] {
+  width: 50%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box; /* Important to include padding in width */
 }
 
 .map-container input[list] {
-    width: 50%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box; /* Important to include padding in width */
+  width: 50%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box; /* Important to include padding in width */
 }
 
 .map-container button {
-  
 }
 
 .map-container button:hover {
-  
 }
 
 #map {
-    height: 200px;
-    width: 100%;
-    background-color: #e0f7fa; /* Light blue map placeholder */
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-top: 10px;
-    text-align: center;
-    line-height: 200px; /* Vertically center text */
-    color: #777;
-    font-size: 0.9em;
+  height: 200px;
+  width: 100%;
+  background-color: #e0f7fa; /* Light blue map placeholder */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-top: 10px;
+  text-align: center;
+  line-height: 200px; /* Vertically center text */
+  color: #777;
+  font-size: 0.9em;
 }
 
 /* Adjustments for overall layout */
 body {
-    overflow: hidden; /* Prevent scrollbar */
+  overflow: hidden; /* Prevent scrollbar */
 }
 
-.main-content, .map-container {
-    overflow: auto; /* Enable scrollbar within sections */
+.main-content,
+.map-container {
+  overflow: auto; /* Enable scrollbar within sections */
 }
 /* Styles for the flight search form */
 form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .form-group {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 label {
-    font-weight: bold;
-    margin-bottom: 5px;
+  font-weight: bold;
+  margin-bottom: 5px;
 }
 
 input[type="date"],
 input[list] {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-    transition: border-color 0.3s;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
 }
 
 input[type="date"]:focus,
 input[list]:focus {
-    border-color: #007bff;
-    outline: none;
+  border-color: #007bff;
+  outline: none;
 }
 
 button {
-    padding: 15px;
-    background-color: #fff;
-    color: #000;
-    border: none;
-    border-radius: 4px;
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: background-color 0.3s;
+  padding: 15px;
+  background-color: #fff;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 button:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
 }
 
 /* Flight card layout */
@@ -266,7 +267,7 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 1.2rem;
+  font-size: 0.6 rem;
   font-weight: bold;
   color: #333;
 }
@@ -274,6 +275,13 @@ button:hover {
 .flight-details {
   margin-top: 10px;
   font-size: 1rem;
+}
+
+.flight-airline {
+  display: flex;
+  justify-content: left; /* Distributes items with equal spacing */
+  flex-wrap: wrap; /* Allows wrapping on smaller screens */
+  gap: min(5vw, 70px); /* Dynamically adjusts gap based on screen size */
 }
 
 .flight-details p {
@@ -311,17 +319,17 @@ button:hover {
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .container {
-      margin: 20px;
-      padding: 15px;
+    margin: 20px;
+    padding: 15px;
   }
 
   h1 {
-      font-size: 1.5rem;
+    font-size: 1.5rem;
   }
 
   .flight-header {
-      flex-direction: column;
-      align-items: flex-start;
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
@@ -457,4 +465,65 @@ button:hover {
   to {
     transform: translateY(0);
   }
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  width: 60%;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px black;
+}
+
+.modal-container {
+  display: flex;
+  gap: 20px;
+}
+
+.modal-left,
+.modal-right {
+  flex: 1;
+}
+
+.modal-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.modal-right button {
+  width: 100%;
+}
+
+.close {
+  cursor: pointer;
+  float: right;
+  font-size: 24px;
+}
+
+.book-button {
+  background-color: #000;
+  color: white;
+  padding: 10px 10px;
+  border: none;
+  cursor: pointer;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
+    Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  font-weight: bold;
+  font-size: Medium;
+}
+
+#modal-departure {
+  display: block;
+}
+
+#modal-departure,
+#modal-layovers .layover strong {
+  font-weight: normal; /* Removes bold */
 }

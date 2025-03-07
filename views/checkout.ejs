@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="/styles.css"> <!-- Link your styles -->
+</head>
+<body>
+    <header>
+        <h1>Flight Checkout</h1>
+    </header>
+
+    <main>
+        <% if (flight) { %>
+            <div class="checkout-card">
+                <h2>Confirm Your Booking</h2>
+                <div class="flight-details">
+                    <p><strong>Airline:</strong> <%= flight.airline %></p>
+                    <p><strong>Flight Number:</strong> <%= flight.flightNumber %></p>
+                    <p><strong>Departure:</strong> <%= flight.departureCity %> (<%= flight.departureTime %>)</p>
+                    <p><strong>Arrival:</strong> <%= flight.arrivalCity %> (<%= flight.arrivalTime %>)</p>
+                    <p><strong>Price:</strong> $<%= flight.price %></p>
+                </div>
+
+                <form action="/confirm-booking" method="POST">
+                    <input type="hidden" name="flightId" value="<%= flight.id %>">
+                    <button type="submit">Confirm and Pay</button>
+                </form>
+            </div>
+        <% } else { %>
+            <p>No flight selected. Please go back and choose a flight.</p>
+        <% } %>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Your Flight Booking App</p>
+    </footer>
+</body>
+</html>
