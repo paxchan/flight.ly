@@ -1,0 +1,13 @@
+<div class="flight-card">
+    <div class="flight-info">
+        <div class="flight-header">
+            <span><%= formatDateTime(flight.departureDatetime, flight.arrivalDatetime) %></span>
+            <span class="cost">$<%= flight.cost %></span>
+        </div>
+        <div class="flight-airline">
+            <span><%= formatDuration(flight.totalFlightDuration) %></span>
+            <span class="airline"><%= flight.airline %></span>
+            <span><%= flight.layoverCount === 0 ? "Non-Stop" : flight.layoverCount === 1 ? "1 stop" : `${flight.layoverCount} stops` %></span>
+        </div>
+    </div>
+</div>

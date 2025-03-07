@@ -4,28 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mindtrip Replica</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to the CSS file -->
+    <link rel="stylesheet" href="styles.css"> 
 </head>
 <body>
 
     <!-- Sidebar -->
     <div class="sidebar">
-        
         <div class="flex-container">
-            <div class="menu-item">
-                <span>Search</span>
-            </div>
-            <div class="menu-item">
-                <span>Chats</span>
-            </div>
-            <div class="menu-item">
-                <span>Checkout</span>
-            </div>
+            <div class="menu-item"><span>Instructions</span></div>
+            <div class="menu-item"><span>Chats</span></div>
+            <div class="menu-item"><span>Checkout</span></div>
         </div>
-        <div class="new-chat">New Chat</div>
-        <div class="traveler">
-            <span>Traveler</span>
-        </div>
+        <div class="traveler"><span>Traveler</span></div>
         <div class="footer">
             Company Contact Help<br>
             Terms Privacy<br>
@@ -59,12 +49,37 @@
                 </span>
             </button>
         </form>
+
         <div id="flight-results" class="flight-card-container">
             <!-- Flight results will be populated dynamically -->
         </div>
 
-        <div id="map">
-            Map Placeholder
+        <div id="map">Map Placeholder</div>
+    </div>
+
+    <!-- Booking Modal (Improved) -->
+    <div id="booking-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeBookingModal()">&times;</span>
+            <h2>Confirm Your Flight</h2>
+            
+            <div class="modal-container">
+                <!-- Left: Flight Details -->
+                <div class="modal-left">
+                    <p><strong>Airline:</strong> <span id="modal-airline"></span></p>
+                    <p><strong>Departure Airport:</strong> <span id="modal-departure-airport"></span></p>
+                    <p><strong>Arrival Airport:</strong> <span id="modal-arrival-airport"></span></p>
+                    <p><strong>Departure & Arrival:</strong> <span id="modal-departure"></span></p>
+                    <p id="modal-duration"></p>
+                    <p><strong>Cost:</strong> <span id="modal-cost"></span></p>
+                </div>
+    
+                <!-- Right: Layover Info + Booking -->
+                <div class="modal-right">
+                    <div id="modal-layovers"></div>
+                    <button id="confirm-booking" class="btn-31">Book Now</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -73,8 +88,6 @@
         <h1>New chat</h1>
         <h2>Where to today?</h2>
         <p>Hey there, where would you like to go? I'm here to assist you with booking your flight.</p>
-
-        <!-- AI Tool Input -->
         <div class="ai-tool">
             <input type="text" placeholder="Ask anything...">
             <hr>
@@ -82,39 +95,35 @@
     </div>
 
     <script>
-        function formatDateTime(departureDatetime, arrivalDatetime) {
+        function formatDateTime(departureDatetime, arrivalDatetime = null, fullFormat = false) {
+            // Ensure the datetime values are valid
+            if (!departureDatetime || isNaN(new Date(departureDatetime).getTime())) return "Invalid Date";
+            if (arrivalDatetime && isNaN(new Date(arrivalDatetime).getTime())) return "Invalid Date";
+
             const departure = new Date(departureDatetime);
-            const arrival = new Date(arrivalDatetime);
+            const arrival = arrivalDatetime ? new Date(arrivalDatetime) : null;
 
-            // Extract times in local format
-            const departureTime = departure.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hourCycle: 'h12' });
-            const arrivalTime = arrival.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hourCycle: 'h12' });
+            if (fullFormat) {
+                // ✅ Full Date + Time (Used in Modal)
+                return arrival
+                    ? `<strong>${departure.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</strong> 
+                    → 
+                    <strong>${arrival.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</strong>`
+                    : `<strong>${departure.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</strong>`;
+            } else {
+                // ✅ Time Only (Used in Search Results)
+                const formattedDeparture = departure.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                let formattedArrival = arrival ? arrival.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "";
 
-            // Extract local year, month, and day for accurate comparison
-            const departureYear = departure.getFullYear();
-            const departureMonth = departure.getMonth();
-            const departureDay = departure.getDate();
+                if (arrival) {
+                    const dayDifference = arrival.getDate() - departure.getDate();
+                    if (dayDifference > 0) {
+                        formattedArrival += `<sup>+${dayDifference}</sup>`;
+                    }
+                }
 
-            const arrivalYear = arrival.getFullYear();
-            const arrivalMonth = arrival.getMonth();
-            const arrivalDay = arrival.getDate();
-
-            // Create full local date objects (ignoring time) to accurately compare dates
-            const departureDate = new Date(departureYear, departureMonth, departureDay);
-            const arrivalDate = new Date(arrivalYear, arrivalMonth, arrivalDay);
-
-            // Calculate actual day difference
-            let dayDifference = (arrivalDate - departureDate) / (1000 * 60 * 60 * 24); // Convert milliseconds to days
-
-            // Ensure that if the flight lands on an earlier time but a different day, we still count +1
-            if (dayDifference === 0 && arrival < departure) {
-                dayDifference = 1;
+                return arrival ? `${formattedDeparture} → ${formattedArrival}` : formattedDeparture;
             }
-
-            // Add +1, +2, etc. if flight actually spans multiple days
-            const dayIndicator = dayDifference > 0 ? `<sup>+${dayDifference}</sup>` : '';
-
-            return `${departureTime} - ${arrivalTime} ${dayIndicator}`;
         }
 
 
@@ -122,18 +131,6 @@
             const [hours, minutes] = duration.split(':').map(Number);
             return `${hours} hr ${minutes} min`;
         }
-
-        function toggleLayoverDetails(event) {
-            // Find the closest .flight-info container
-            const flightInfo = event.target.closest('.flight-info');
-            
-            // Find the corresponding .layover-details div within the same .flight-info container
-            const details = flightInfo.querySelector('.layover-details');
-            
-            // Toggle the visibility of the details
-            details.style.display = details.style.display === "none" ? "block" : "none";
-        }
-
 
         function displayFlightResults(flights) {
             const flightResultsContainer = document.getElementById('flight-results');
@@ -152,42 +149,65 @@
                     <div class="flight-info">
                         <div class="flight-header">
                             <span>${formatDateTime(flight.departureDatetime, flight.arrivalDatetime)}</span>
-                            <span>${formatDuration(flight.totalFlightDuration)}</span>
                             <span class="cost">$${flight.cost}</span>
-                            <button class="layover-toggle" ${flight.layoverCount === 0 ? 'disabled' : ''}>
-                                &#9660;
-                            </button>
+                            <button class="book-button" onclick='openBookingModal(${JSON.stringify(flight)})'>Book</button>
                         </div>
                         <div class="flight-airline">
+                            <span>${formatDuration(flight.totalFlightDuration)}</span>
                             <span class="airline">${flight.airline}</span>
-                        </div>
-                        <div class="layover-details" style="display: none;">
-                            ${flight.layovers.map((layover, index) => `
-                                <div class="layover">
-                                    <strong>Layover ${index + 1}:</strong> ${layover.city}
-                                    <br>Duration: ${formatDuration(layover.duration)}
-                                    <br>Next Flight Departs: ${new Date(layover.departureDatetime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hourCycle: 'h12' })}
-                                </div>
-                            `).join('')}
+                            <span>${flight.layoverCount === 0 ? "Non-Stop" : flight.layoverCount === 1 ? "1 stop" : `${flight.layoverCount} stops`}</span>
                         </div>
                     </div>
                 `;
 
-                // Add the event listener to the button if there are layovers
-                if (flight.layoverCount > 0) {
-                    card.querySelector('.layover-toggle').addEventListener('click', function(event) {
-                        // Find the closest parent flight-info container
-                        const flightInfo = event.target.closest('.flight-info');
-                        const details = flightInfo.querySelector('.layover-details');
-
-                        // Toggle the visibility of the details
-                        details.style.display = details.style.display === "none" ? "block" : "none";
-                    });
-                }
-
-                // Append the card to the container
                 flightResultsContainer.appendChild(card);
             });
+        }
+
+        function openBookingModal(flight) {
+            document.getElementById("modal-airline").textContent = flight.airline;
+            document.getElementById("modal-departure-airport").textContent = flight.departureCity;
+            document.getElementById("modal-arrival-airport").textContent = flight.arrivalCity;
+            document.getElementById("modal-departure").innerHTML = formatDateTime(flight.departureDatetime, flight.arrivalDatetime, true);
+            document.getElementById("modal-cost").textContent = `$${flight.cost}`;
+
+            const durationContainer = document.getElementById("modal-duration");
+            
+            if (flight.layovers.length > 0) {
+                // Show Total Travel Duration when layovers exist
+                durationContainer.innerHTML = `
+                    <strong>First Flight Duration:</strong> ${formatDuration(flight.flightDuration)}<br><br>
+                    <strong>Total Travel Duration:</strong> ${formatDuration(flight.totalFlightDuration)}
+                `;
+            } else {
+                // Show Flight Duration when it's a direct flight
+                durationContainer.innerHTML = `<strong>Flight Duration:</strong> ${formatDuration(flight.flightDuration)}`;
+            }
+
+            // Handle Layovers
+            const layoversContainer = document.getElementById("modal-layovers");
+            layoversContainer.innerHTML = ""; // Clear previous data
+
+            if (flight.layovers && flight.layovers.length > 0) {
+                flight.layovers.forEach((layover, index) => {
+                    layoversContainer.innerHTML += `
+                        <div class="layover">
+                            <strong>Layover ${index + 1}:</strong> ${layover.city}<br>
+                            <strong>Layover Duration:</strong> ${formatDuration(layover.duration)}<br>
+                            <strong>Departure:</strong> ${formatDateTime(layover.departureDatetime, null, true)}<br>
+                            <strong>Flight Duration:</strong> ${formatDuration(layover.flightDuration)}
+                            <hr>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById("booking-modal").style.display = "block";
+        }
+
+
+        function closeBookingModal() {
+            document.getElementById('booking-modal').style.display = "none";
         }
 
         document.getElementById('flight-search-form').addEventListener('submit', async (event) => {
