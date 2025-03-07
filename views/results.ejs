@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flight Results</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <%- include('partials/sidebar') %>
+
+    <div class="main-content">
+      <h1>Flight Results</h1>
+      <h2>Your Score Breakdown</h2>
+
+      <div class="results-container">
+        <table
+          border="1"
+          cellpadding="10"
+          cellspacing="0"
+          style="width: 100%; border-collapse: collapse; text-align: left"
+        >
+          <tr>
+            <th>Criteria</th>
+            <th>Requirement</th>
+            <th>Points Achieved</th>
+          </tr>
+          <% criteria.forEach(item => { %>
+          <tr>
+            <td><%= item.name %></td>
+            <td><%= item.requirement %></td>
+            <td><%= item.points %></td>
+          </tr>
+          <% }) %>
+        </table>
+      </div>
+
+      <h2>Total Score: <%= totalScore %>/100</h2>
+    </div>
+  </body>
+</html>

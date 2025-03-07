@@ -281,7 +281,7 @@ button:hover {
   display: flex;
   justify-content: left; /* Distributes items with equal spacing */
   flex-wrap: wrap; /* Allows wrapping on smaller screens */
-  gap: min(5vw, 70px); /* Dynamically adjusts gap based on screen size */
+  gap: min(10vw, 30px); /* Dynamically adjusts gap based on screen size */
 }
 
 .flight-details p {
@@ -526,4 +526,17 @@ button:hover {
 #modal-departure,
 #modal-layovers .layover strong {
   font-weight: normal; /* Removes bold */
+}
+
+#map {
+  width: 100%;
+  height: 300px; /* Adjust as needed */
+  border: 1px solid #ccc;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center; /* Center buttons */
+  gap: 15px; /* Space between buttons */
+  margin-top: 15px;
 }

@@ -47,6 +47,14 @@ app.get("/api/test-connection", (req, res) => {
   });
 });
 
+app.get("/api/maps-key", (req, res) => {
+  res.json({ apiKey: process.env.GOOGLE_MAPS_API_KEY });
+});
+
+app.get("/checkout", (req, res) => {
+  res.render("checkout");
+});
+
 // Endpoint to get all cities for dropdown
 app.get("/api/cities", (req, res) => {
   const query = "SELECT DISTINCT city FROM Airports";
@@ -176,6 +184,155 @@ app.post(
     );
   }
 );
+
+// Serve flights.ejs for the root URL
+app.get("/flights", async (req, res) => {
+  try {
+    const citiesResponse = await new Promise((resolve, reject) => {
+      db.query("SELECT DISTINCT city FROM Airports", (err, results) => {
+        if (err) reject(err);
+        else resolve(results);
+      });
+    });
+
+    const cities = citiesResponse.map((row) => row.city);
+    res.render("flights", { cities: cities });
+  } catch (error) {
+    console.error("Error fetching cities:", error);
+    res.status(500).send("An error occurred while fetching cities.");
+  }
+});
+
+app.get("/results", (req, res) => {
+  let cart = JSON.parse(req.query.cart || "[]");
+  let totalCost = cart.reduce((sum, flight) => sum + (flight.cost || 0), 0); // Ensure cost is always a number
+  let points = 0;
+  let criteria = [];
+
+  function addCriterion(name, requirement, achieved, score) {
+    let finalScore = Math.max(0, Math.min(10, score)); // Ensure scores stay between 0 and 10
+    criteria.push({
+      name,
+      requirement,
+      achieved,
+      points: isNaN(finalScore) ? 0 : finalScore,
+    });
+    points += isNaN(finalScore) ? 0 : finalScore;
+  }
+
+  let hasSLCDeparture = cart.some((f) => f.departureCity === "Salt Lake City");
+  addCriterion(
+    "Departed from SLC",
+    "Must depart from SLC",
+    hasSLCDeparture,
+    hasSLCDeparture ? 10 : 0
+  );
+
+  let hasDCAArrival = cart.some((f) => f.arrivalCity === "Washington D.C.");
+  addCriterion(
+    "Arrived in DC",
+    "Must arrive in Washington D.C.",
+    hasDCAArrival,
+    hasDCAArrival ? 10 : 0
+  );
+
+  let hasDCADeparture = cart.some((f) => f.departureCity === "Washington D.C.");
+  addCriterion(
+    "Departed from DC",
+    "Must depart from Washington D.C.",
+    hasDCADeparture,
+    hasDCADeparture ? 10 : 0
+  );
+
+  let hasSLCArrival = cart.some((f) => f.arrivalCity === "Salt Lake City");
+  addCriterion(
+    "Arrived in SLC",
+    "Must arrive in Salt Lake City",
+    hasSLCArrival,
+    hasSLCArrival ? 10 : 0
+  );
+
+  // Budget Calculation
+  let budgetThreshold = 1000;
+  let budgetPenalty = Math.floor((totalCost - budgetThreshold) / 10);
+  addCriterion(
+    "Stayed under budget",
+    "$1000 limit",
+    totalCost <= budgetThreshold,
+    10 - Math.max(0, budgetPenalty)
+  );
+
+  // Arrival Time in DC
+  let washingtonArrival = cart.find((f) => f.arrivalCity === "Washington D.C.");
+  if (washingtonArrival) {
+    let arrivalDate = new Date(washingtonArrival.arrivalDatetime);
+    let deadline = new Date("2025-03-21T09:00:00");
+    let delayHours = Math.floor((arrivalDate - deadline) / (1000 * 60 * 60));
+    addCriterion(
+      "Arrived on time in DC",
+      "Before Mar 21, 9 AM",
+      arrivalDate <= deadline,
+      10 - Math.max(0, delayHours)
+    );
+  }
+
+  // Arrival Time in SLC
+  let slcArrival = cart.find((f) => f.arrivalCity === "Salt Lake City");
+  if (slcArrival) {
+    let arrivalDate = new Date(slcArrival.arrivalDatetime);
+    let deadline = new Date("2025-03-25T08:00:00");
+    let delayHours = Math.floor((arrivalDate - deadline) / (1000 * 60 * 60));
+    addCriterion(
+      "Arrived on time in SLC",
+      "Before Mar 25, 8 AM",
+      arrivalDate <= deadline,
+      10 - Math.max(0, delayHours)
+    );
+  }
+
+  // Departure Time from DC
+  let washingtonDeparture = cart.find(
+    (f) => f.departureCity === "Washington D.C."
+  );
+  if (washingtonDeparture) {
+    let departureDate = new Date(washingtonDeparture.departureDatetime);
+    let earliestAllowed = new Date("2025-03-23T20:00:00");
+    addCriterion(
+      "Left DC on time",
+      "After Mar 23, 8 PM",
+      departureDate >= earliestAllowed,
+      departureDate >= earliestAllowed ? 10 : 0
+    );
+  }
+
+  // Number of Stops
+  let totalStops = cart.reduce(
+    (sum, flight) => sum + (flight.layoverCount || 0),
+    0
+  );
+  let stopPenalty = Math.min(10, totalStops * 2);
+  addCriterion(
+    "Number of Stops",
+    "Lose 2 points per stop",
+    true,
+    10 - stopPenalty
+  );
+
+  // Total Travel Time
+  let totalTravelTime = cart.reduce(
+    (sum, flight) => sum + (flight.totalFlightDuration || 0),
+    0
+  );
+  let travelPenalty = Math.floor((totalTravelTime - 12) / 2);
+  addCriterion(
+    "Total Travel Time",
+    "Lose 1 point per 2 extra hours",
+    true,
+    10 - Math.max(0, travelPenalty)
+  );
+
+  res.render("results", { criteria, totalScore: points });
+});
 
 // Serve flights.ejs for the root URL
 app.get("/", async (req, res) => {

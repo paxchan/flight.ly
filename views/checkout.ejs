@@ -1,40 +1,403 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Checkout</title>
-    <link rel="stylesheet" href="/styles.css"> <!-- Link your styles -->
-</head>
-<body>
-    <header>
-        <h1>Flight Checkout</h1>
-    </header>
+    <link rel="stylesheet" href="styles.css" />
 
-    <main>
-        <% if (flight) { %>
-            <div class="checkout-card">
-                <h2>Confirm Your Booking</h2>
-                <div class="flight-details">
-                    <p><strong>Airline:</strong> <%= flight.airline %></p>
-                    <p><strong>Flight Number:</strong> <%= flight.flightNumber %></p>
-                    <p><strong>Departure:</strong> <%= flight.departureCity %> (<%= flight.departureTime %>)</p>
-                    <p><strong>Arrival:</strong> <%= flight.arrivalCity %> (<%= flight.arrivalTime %>)</p>
-                    <p><strong>Price:</strong> $<%= flight.price %></p>
+    <style>
+      /* Layout Styling */
+      .checkout-container {
+        display: flex;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+      }
+
+      /* Flight Cart Styling */
+      .cart-container {
+        flex: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: left;
+      }
+
+      .flight-card {
+        background-color: white;
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 12px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+        text-align: left;
+        width: 100%;
+        max-width: 500px;
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .flight-card:hover {
+        transform: translateY(-3px);
+      }
+
+      .flight-card p {
+        margin: 5px 0;
+        font-size: 16px;
+        color: #333;
+      }
+
+      /* Total Cost Column */
+      .total-column {
+        flex: 1;
+        padding: 20px;
+        text-align: left;
+        margin-left: 30px;
+      }
+
+      .total-column h2 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+      }
+
+      .total-cost-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #007bff;
+      }
+
+      /* Checkout Button (Hidden by Default) */
+      .checkout-button {
+        display: none;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background 0.3s ease-in-out;
+      }
+
+      .checkout-button:hover {
+        background-color: #218838;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .checkout-container {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .total-column {
+          margin-top: 20px;
+          margin-left: 0;
+          width: 100%;
+          text-align: center;
+        }
+
+        .checkout-button {
+          width: 100%;
+          max-width: 300px;
+        }
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        width: 60%;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px black;
+        z-index: 1000;
+        visibility: visible; /* Ensure visibility */
+      }
+
+      .modal-container {
+        display: flex;
+        gap: 20px;
+      }
+
+      .modal-left,
+      .modal-right {
+        flex: 1;
+      }
+
+      .modal-right {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .close {
+        cursor: pointer;
+        float: right;
+        font-size: 24px;
+      }
+
+      .show-modal {
+        display: block !important; /* Ensures modal becomes visible */
+      }
+
+      .book-button {
+        background-color: #000;
+        color: white;
+        padding: 10px 10px;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('partials/sidebar') %>
+
+    <div class="main-content">
+      <h1>Your Selected Flights</h1>
+      <span
+        ><button class="book-button" id="clear-cart">Clear Cart</button></span
+      >
+      <span
+        ><button class="book-button" onclick="window.location.href='/'">
+          Back to Search
+        </button></span
+      >
+
+      <div class="checkout-container">
+        <!-- Flight Cart -->
+        <div class="cart-container" id="cart-container">
+          <p>Loading your selected flights...</p>
+        </div>
+
+        <!-- Total Cost Column -->
+        <div class="total-column" id="total-column">
+          <h2>Flight Costs</h2>
+          <div id="cost-breakdown"></div>
+          <hr />
+          <h2>Total Cost</h2>
+          <p class="total-cost-value" id="total-cost">$0.00</p>
+          <button class="checkout-button" id="checkout-button">Checkout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flight Info Modal -->
+    <div id="flight-info-modal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeInfoModal()">&times;</span>
+        <h2>Flight Details</h2>
+
+        <div class="modal-container">
+          <!-- Left: Flight Details -->
+          <div class="modal-left">
+            <p><strong>Airline:</strong> <span id="info-airline"></span></p>
+            <p>
+              <strong>Departure Airport:</strong>
+              <span id="info-departure-airport"></span>
+            </p>
+            <p>
+              <strong>Arrival Airport:</strong>
+              <span id="info-arrival-airport"></span>
+            </p>
+            <p>
+              <strong>Departure & Arrival:</strong>
+              <span id="info-departure"></span>
+            </p>
+            <p id="modal-duration"></p>
+            <p><strong>Cost:</strong> <span id="info-cost"></span></p>
+          </div>
+
+          <!-- Right: Layover Info -->
+          <div class="modal-right">
+            <div id="info-layovers"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("checkout-button")
+        .addEventListener("click", function () {
+          let cart = JSON.parse(localStorage.getItem("cart")) || [];
+          window.location.href =
+            "/results?cart=" + encodeURIComponent(JSON.stringify(cart));
+        });
+
+      function formatDuration(duration) {
+        if (!duration) return "N/A"; // Handle missing duration
+        const [hours, minutes] = duration.split(":").map(Number);
+        return `${hours} hr ${minutes} min`;
+      }
+
+      function loadCart() {
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const cartContainer = document.getElementById("cart-container");
+        const costBreakdown = document.getElementById("cost-breakdown");
+        const totalCostElement = document.getElementById("total-cost");
+        const checkoutButton = document.getElementById("checkout-button");
+
+        if (cart.length === 0) {
+          cartContainer.innerHTML = "<p>No flights added to the cart.</p>";
+          costBreakdown.innerHTML = "<p>No flights listed.</p>";
+          totalCostElement.textContent = "$0.00";
+          checkoutButton.style.display = "none";
+          return;
+        }
+
+        cartContainer.innerHTML = "";
+        costBreakdown.innerHTML = "";
+        let totalCost = 0;
+
+        cart.forEach((flight, index) => {
+          // Create flight card
+          const flightElement = document.createElement("div");
+          flightElement.className = "flight-card";
+
+          flightElement.innerHTML = `
+                <p><strong>Airline:</strong> ${flight.airline}</p>
+                <p><strong>From:</strong> ${
+                  flight.departureCity
+                } → <strong>To:</strong> ${flight.arrivalCity}</p>
+                <p><strong>Departure:</strong> ${formatDateTime(
+                  flight.departureDatetime
+                )}</p>
+                <p><strong>Arrival:</strong> ${formatDateTime(
+                  flight.arrivalDatetime
+                )}</p>
+                <p><strong>Cost:</strong> $${flight.cost}</p>
+                <button class="book-button" onclick="openInfoModal(${index})">Info</button>
+                <button class="book-button" onclick="removeFromCart(${index})">Remove</button>
+            `;
+
+          cartContainer.appendChild(flightElement);
+
+          // Add flight cost to breakdown column
+          const costItem = document.createElement("p");
+          costItem.textContent = `${flight.airline}: $${flight.cost}`;
+          costBreakdown.appendChild(costItem);
+
+          // Add to total cost
+          totalCost += parseFloat(flight.cost);
+        });
+
+        // Update total cost
+        totalCostElement.textContent = `$${totalCost.toFixed(2)}`;
+
+        // Show checkout button if there are at least two flights
+        if (cart.length >= 2) {
+          checkoutButton.style.display = "block";
+        } else {
+          checkoutButton.style.display = "none";
+        }
+      }
+
+      function removeFromCart(index) {
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        cart.splice(index, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        loadCart();
+      }
+
+      document
+        .getElementById("clear-cart")
+        .addEventListener("click", function () {
+          localStorage.removeItem("cart");
+          loadCart();
+        });
+
+      function formatDateTime(datetime) {
+        const date = new Date(datetime);
+        return date.toLocaleString([], {
+          dateStyle: "medium",
+          timeStyle: "short",
+        });
+      }
+
+      function openInfoModal(index) {
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        let flight = cart[index];
+
+        if (!flight) {
+          console.error("Flight data not found for index:", index);
+          return;
+        }
+
+        document.getElementById("info-airline").textContent = flight.airline;
+        document.getElementById("info-departure-airport").textContent =
+          flight.departureCity;
+        document.getElementById("info-arrival-airport").textContent =
+          flight.arrivalCity;
+        document.getElementById("info-departure").innerHTML = formatDateTime(
+          flight.departureDatetime,
+          flight.arrivalDatetime,
+          true
+        );
+        document.getElementById("info-cost").textContent = `$${flight.cost}`;
+
+        const durationContainer = document.getElementById("modal-duration");
+
+        if (flight.layovers.length > 0) {
+          // Show Total Travel Duration when layovers exist
+          durationContainer.innerHTML = `
+                    <strong>First Flight Duration:</strong> ${formatDuration(
+                      flight.flightDuration
+                    )}<br><br>
+                    <strong>Total Travel Duration:</strong> ${formatDuration(
+                      flight.totalFlightDuration
+                    )}
+                `;
+        } else {
+          // Show Flight Duration when it's a direct flight
+          durationContainer.innerHTML = `<strong>Flight Duration:</strong> ${formatDuration(
+            flight.flightDuration
+          )}`;
+        }
+
+        // Handle Layovers
+        const layoversContainer = document.getElementById("info-layovers");
+        layoversContainer.innerHTML = ""; // Clear previous layover data
+        if (flight.layovers && flight.layovers.length > 0) {
+          flight.layovers.forEach((layover, index) => {
+            layoversContainer.innerHTML += `
+                <div class="layover">
+                    <strong>Layover ${index + 1}:</strong> ${layover.city}<br>
+                    <strong>Layover Duration:</strong> ${formatDuration(
+                      layover.duration
+                    )}<br>
+                    <strong>Departure:</strong> ${formatDateTime(
+                      layover.departureDatetime,
+                      null,
+                      true
+                    )}<br>
+                    <strong>Flight Duration:</strong> ${formatDuration(
+                      layover.flightDuration
+                    )}
+                    <hr>
                 </div>
+            `;
+          });
+        }
 
-                <form action="/confirm-booking" method="POST">
-                    <input type="hidden" name="flightId" value="<%= flight.id %>">
-                    <button type="submit">Confirm and Pay</button>
-                </form>
-            </div>
-        <% } else { %>
-            <p>No flight selected. Please go back and choose a flight.</p>
-        <% } %>
-    </main>
+        // Fix: Ensure modal displays properly
+        const modal = document.getElementById("flight-info-modal");
+        modal.classList.add("show-modal");
+        modal.style.display = "block";
+      }
 
-    <footer>
-        <p>&copy; 2025 Your Flight Booking App</p>
-    </footer>
-</body>
+      function closeInfoModal() {
+        const modal = document.getElementById("flight-info-modal");
+        modal.classList.remove("show-modal");
+        modal.style.display = "none"; // Ensures it disappears
+      }
+
+      window.onload = loadCart;
+    </script>
+  </body>
 </html>
